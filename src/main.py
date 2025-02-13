@@ -15,6 +15,9 @@ class Position:
     row: int
     col: int
 
+    def __repr__(cls):
+        return f"{__class__.__name__}(row={cls.row}, col={cls.col})"
+
     @classmethod
     def from_chess_notation(cls, notation: str) -> Position:
         """Convert chess notation (e.g. 'A1' to Position)."""
@@ -48,6 +51,9 @@ class ChessPiece(ABC):
     def __init__(self, color: Color):
         self.color = color
         self._has_moved = False
+
+    def __repr__(self):
+        return f"{__class__.__name__}(color={self.color})"
 
     @abstractmethod
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
@@ -86,6 +92,9 @@ class LineStrategy(MoveStrategy):
     def __init__(self, directions):
         self.directions = directions
 
+    def __repr__(self):
+        return f"{__class__.__name__}(directions={self.directions})"
+
     def get_moves(self, position: Position, board: Board) -> list[Position]:
         moves = []
         for dx, dy in self.directions:
@@ -98,7 +107,7 @@ class LineStrategy(MoveStrategy):
         return moves
 
 
-class StraightLineStrategy(LineStrategy):
+class StraightStrategy(LineStrategy):
     def __init__(self):
         super().__init__([(0, 1), (0, -1), (1, 0), (-1, 0)])
 
@@ -134,7 +143,7 @@ class Pawn(ChessPiece):
 class Rook(ChessPiece):
     def __init__(self, color):
         super().__init__(color)
-        self._strategy = StraightLineStrategy()
+        self._strategy = StraightStrategy()
 
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
         return self._strategy.get_moves(position, board)
@@ -152,7 +161,7 @@ class Bishop(ChessPiece):
 class Queen(ChessPiece):
     def __init__(self, color: Color):
         super().__init__(color)
-        self._straight_strategy = StraightLineStrategy()
+        self._straight_strategy = StraightStrategy()
         self._diagonal_strategy = DiagonalStrategy()
 
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
@@ -161,6 +170,7 @@ class Queen(ChessPiece):
         ) + self._diagonal_strategy.get_moves(position, board)
 
 
+# TODO: Implement 'KnightStrategy'
 class Knight(ChessPiece):
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
         moves = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
@@ -171,6 +181,7 @@ class Knight(ChessPiece):
         ]
 
 
+# TODO: Use combined 'StraightStrategy' and 'DiagonalStrategy'
 class King(ChessPiece):
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
         moves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
