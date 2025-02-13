@@ -1,3 +1,7 @@
+"""
+Test
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -29,7 +33,7 @@ class Position:
         return f"{col}{row}"
 
     def is_valid(self) -> bool:
-        """Check if position is within board boundariws."""
+        """Check if position is within board boundaries."""
         return 0 <= self.row < 8 and 0 <= self.col < 8
 
 
@@ -102,16 +106,10 @@ class StraightLineStrategy(LineStrategy):
     def __init__(self):
         super().__init__([(0, 1), (0, -1), (1, 0), (-1, 0)])
 
-    def get_moves(self, position: Position, board: Board) -> list[Position]:
-        pass
-
 
 class DiagonalStrategy(LineStrategy):
     def __init__(self):
         super().__init__([(1, 1), (1, -1), (-1, 1), (-1, -1)])
-
-    def get_moves(self, position: Position, board: Board) -> list[Position]:
-        pass
 
 
 class Pawn(ChessPiece):
@@ -186,15 +184,6 @@ class King(ChessPiece):
             if Position(position.row + dx, position.col + dy).is_valid()
         ]
 
-        # for dx in [-1, 0, 1]:
-        #     for dy in [-1, 0, 1]:
-        #         if dx == 0 and dy == 0:
-        #             continue
-        #         new_pos = Position(position.row + dx, position.col + dy)
-        #         if new_pos.is_valid():
-        #             moves.append(new_pos)
-        # return moves
-
 
 class PieceFactory:
     """Factory pattern for creating chess pieces."""
@@ -268,7 +257,7 @@ class Board:
         return False
 
     def display(self):
-        print("   A B C D E F G H")
+        print("  A B C D E F G H")
         for row_idx, row in enumerate(self._board):
             print(f"{8 - row_idx} ", end="")
             for piece in row:
@@ -291,6 +280,7 @@ class GameState:
     def notify_observers(self):
         for observer in self._observers:
             observer.update(self)
+            # observer.display(self)
 
     def switch_turn(self):
         self.current_turn = (
@@ -314,7 +304,7 @@ class ChessGame:
                 return True
         return False
 
-    def update(self):
+    def update(self, game_state: GameState):
         self.display()
 
     def display(self):
