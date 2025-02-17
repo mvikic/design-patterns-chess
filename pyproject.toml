@@ -7,4 +7,6 @@ requires-python = ">=3.13"
 dependencies = []
 
 [dependency-groups]
-dev = []
+dev = [
+    "requests>=2.32.3",
+]

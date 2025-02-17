@@ -117,6 +117,13 @@ class DiagonalStrategy(LineStrategy):
         super().__init__([(1, 1), (1, -1), (-1, 1), (-1, -1)])
 
 
+class KnightStrategy(LineStrategy):
+    def __init__(self):
+        super().__init__(
+            [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
+        )
+
+
 class Pawn(ChessPiece):
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
         moves = []
@@ -170,24 +177,33 @@ class Queen(ChessPiece):
         ) + self._diagonal_strategy.get_moves(position, board)
 
 
-# TODO: Implement 'KnightStrategy'
 class Knight(ChessPiece):
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
-        moves = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
-        return [
-            Position(position.row + dx, position.col + dy)
-            for dx, dy in moves
-            if Position(position.row + dx, position.col + dy).is_valid()
-        ]
+        def __init__(self, color: Color):
+            super().__init__(color)
+            self._knight_strategy = KnightStrategy()
+
+        def _get_possible_moves(
+            self, position: Position, board: Board
+        ) -> list[Position]:
+            return [
+                Position(position.row + dx, position.col + dy)
+                for dx, dy in self._knight_strategy.directions
+                if Position(position.row + dx, position.col + dy).is_valid()
+            ]
 
 
-# TODO: Use combined 'StraightStrategy' and 'DiagonalStrategy'
 class King(ChessPiece):
+    def __init__(self, color: Color):
+        super().__init__(color)
+        self._straight_strategy = StraightStrategy()
+        self._diagonal_strategy = DiagonalStrategy()
+
     def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
-        moves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
         return [
             Position(position.row + dx, position.col + dy)
-            for dx, dy in moves
+            for dx, dy in self._straight_strategy.directions
+            + self._diagonal_strategy.directions
             if Position(position.row + dx, position.col + dy).is_valid()
         ]
 
