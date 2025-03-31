@@ -2,12 +2,21 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class Color(Enum):
+class Color(StrEnum):
     BLACK = "black"
     WHITE = "white"
+
+
+class PieceType(StrEnum):
+    PAWN = "pawn"
+    ROOK = "rook"
+    KNIGHT = "knight"
+    BISHOP = "bishop"
+    QUEEN = "queen"
+    KING = "king"
 
 
 @dataclass(frozen=True)
@@ -15,8 +24,8 @@ class Position:
     row: int
     col: int
 
-    def __repr__(cls):
-        return f"{__class__.__name__}(row={cls.row}, col={cls.col})"
+    def __repr__(self):
+        return f"{__class__.__name__}(row={self.row}, col={self.col})"
 
     @classmethod
     def from_chess_notation(cls, notation: str) -> Position:
@@ -34,15 +43,6 @@ class Position:
     def is_valid(self) -> bool:
         """Check if position is within board boundaries."""
         return 0 <= self.row < 8 and 0 <= self.col < 8
-
-
-class PieceType(Enum):
-    PAWN = "pawn"
-    ROOK = "rook"
-    KNIGHT = "knight"
-    BISHOP = "bishop"
-    QUEEN = "queen"
-    KING = "king"
 
 
 class ChessPiece(ABC):
@@ -80,15 +80,9 @@ class ChessPiece(ABC):
         return symbol.upper() if self.color == Color.WHITE else symbol.lower()
 
 
-class MoveStrategy(ABC):
+class MoveStrategy:
     """Strategy pattern for different movement patterns."""
 
-    @abstractmethod
-    def get_moves(self, position: Position, board: Board) -> list[Position]:
-        pass
-
-
-class LineStrategy(MoveStrategy):
     def __init__(self, directions):
         self.directions = directions
 
@@ -107,17 +101,17 @@ class LineStrategy(MoveStrategy):
         return moves
 
 
-class StraightStrategy(LineStrategy):
+class StraightStrategy(MoveStrategy):
     def __init__(self):
         super().__init__([(0, 1), (0, -1), (1, 0), (-1, 0)])
 
 
-class DiagonalStrategy(LineStrategy):
+class DiagonalStrategy(MoveStrategy):
     def __init__(self):
         super().__init__([(1, 1), (1, -1), (-1, 1), (-1, -1)])
 
 
-class KnightStrategy(LineStrategy):
+class KnightStrategy(MoveStrategy):
     def __init__(self):
         super().__init__(
             [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
@@ -178,19 +172,16 @@ class Queen(ChessPiece):
 
 
 class Knight(ChessPiece):
-    def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
-        def __init__(self, color: Color):
-            super().__init__(color)
-            self._knight_strategy = KnightStrategy()
+    def __init__(self, color: Color):
+        super().__init__(color)
+        self._knight_strategy = KnightStrategy()
 
-        def _get_possible_moves(
-            self, position: Position, board: Board
-        ) -> list[Position]:
-            return [
-                Position(position.row + dx, position.col + dy)
-                for dx, dy in self._knight_strategy.directions
-                if Position(position.row + dx, position.col + dy).is_valid()
-            ]
+    def _get_possible_moves(self, position: Position, board: Board) -> list[Position]:
+        return [
+            Position(position.row + dx, position.col + dy)
+            for dx, dy in self._knight_strategy.directions
+            if Position(position.row + dx, position.col + dy).is_valid()
+        ]
 
 
 class King(ChessPiece):
